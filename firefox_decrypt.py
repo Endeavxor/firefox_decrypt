@@ -462,10 +462,24 @@ class NSSProxy:
                 LOG.debug("Checking user password returned %s", err_status)
 
                 if err_status:
-                    self.handle_error(
-                        Exit.BAD_MASTER_PASSWORD,
-                        "Master password is not correct",
-                    )
+                    LOG.error("Master password is not correct")
+                    choice = input("Do you wan't to bruteforce the Master password ? [Y/n]")
+                    if choice == "Y":
+                        filePassword = input("Enter path of your wordlist : ")
+                        with open(filePassword,"r") as passwordList:
+                            for password in passwordList:
+                                password = password.strip()
+                                err_status: int = self._PK11_CheckUserPassword(keyslot,password)
+                                print("[+] "+ password)
+                                if err_status == 0:
+                                    print("[!] FOUNDED : " + password)
+                                    print("Have a nice CTF :)")
+                                    break
+                    else:
+                        self.handle_error(
+                            Exit.BAD_MASTER_PASSWORD,
+                            "Master password is not correct",
+                        )
 
             else:
                 LOG.info("No Master Password found - no authentication needed")
